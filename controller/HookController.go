@@ -9,7 +9,7 @@ import (
 	"github.com/SpeedVan/go-common/app/web"
 )
 
-// MiddleController todo
+// HookController todo
 type HookController struct {
 	web.Controller
 	JiraService *service.JiraService
