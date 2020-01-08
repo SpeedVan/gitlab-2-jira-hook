@@ -13,7 +13,7 @@ func main() {
 	if cfg, err := env.LoadAllWithoutPrefix("G2J_"); err == nil {
 		logger := log.NewCommon(log.Debug)
 		app := web.New(cfg, logger)
-		app.HandleController(&controller.HookController{})
+		app.HandleController(controller.New(cfg))
 		if err := app.Run(log.Debug); err != nil {
 			os.Exit(1)
 		}

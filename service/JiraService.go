@@ -1,14 +1,14 @@
 package service
 
 import (
-	"net/http"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 
-	"github.com/SpeedVan/go-common/config"
 	"github.com/SpeedVan/go-common/client/httpclient"
+	"github.com/SpeedVan/go-common/config"
 )
 
 // JiraService todo
@@ -29,14 +29,16 @@ func New(cfg config.Config) *JiraService {
 }
 
 type Issue struct {
-	fields *Fields
+	Fields *Fields `json:"fields"`
 }
 
 type Fields struct {
-	project     map[string]string
-	summary     string
-	description string
-	issuetype   map[string]string
+	Project     map[string]string `json:"project"`
+	Summary     string            `json:"summary"`
+	Description string            `json:"description"`
+	Issuetype   map[string]string `json:"issuetype"`
+	Epic        string            `json:"customfield_10006"`
+	Reporter    map[string]string `json:"reporter"`
 }
 
 // CreateIssue response return
@@ -45,28 +47,36 @@ type Fields struct {
 //    "key": "DECISION-6",
 //    "self": "http://jira.renmaitech.com/rest/api/2/issue/176643"
 // }
-func (s *JiraService) CreateIssue(projectKey, issueType, summary, description, remoteLink string) error {
+func (s *JiraService) CreateIssue(projectKey, parentIssue, issueTypeID, summary, description, remoteLink, reporter string) error {
 	fullURL := fmt.Sprintf("http://jira.renmaitech.com/rest/api/2/issue/")
 	issue := &Issue{
-		fields: &Fields{
-			project: map[string]string{
+		Fields: &Fields{
+			Project: map[string]string{
 				"key": projectKey,
 			},
-			summary:     summary,
-			description: description,
-			issuetype: map[string]string{
-				"name": issueType,
+			Summary:     summary,
+			Description: description,
+			Issuetype: map[string]string{
+				"id": issueTypeID,
+			},
+			Epic: parentIssue,
+			Reporter: map[string]string{
+				"name": reporter,
 			},
 		},
 	}
 	bs, _ := json.Marshal(issue)
+	fmt.Println(string(bs))
 	req, _ := http.NewRequest("POST", fullURL, bytes.NewReader(bs))
+	req.SetBasicAuth("008903", "Renmai671056")
+	req.Header.Set("Content-Type", "application/json")
 	res, err := s.HTTPClient.Do(req)
 	if err != nil {
 		return err
 	}
 	result := make(map[string]string)
 	rbs, _ := ioutil.ReadAll(res.Body)
+	fmt.Println(string(rbs))
 	json.Unmarshal(rbs, &result)
 	return s.CreateRemoteLink(result["id"], remoteLink, "任买Gitlab issue")
 }
@@ -83,6 +93,7 @@ func (s *JiraService) CreateRemoteLink(issueIDOrKey, url, title string) error {
 
 	bs, _ := json.Marshal(jsonMap)
 	req, _ := http.NewRequest("POST", fullURL, bytes.NewReader(bs))
+	req.SetBasicAuth("008903", "Renmai671056")
 	req.Header.Set("Content-Type", "application/json")
 	_, err := s.HTTPClient.Do(req)
 
