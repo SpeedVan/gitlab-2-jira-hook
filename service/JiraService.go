@@ -45,10 +45,10 @@ type Fields struct {
 // {
 //    "id": "176643",
 //    "key": "DECISION-6",
-//    "self": "http://jira.renmaitech.com/rest/api/2/issue/176643"
+//    "self": "http://<hostname>/rest/api/2/issue/176643"
 // }
 func (s *JiraService) CreateIssue(projectKey, parentIssue, issueTypeID, summary, description, remoteLink, reporter string) error {
-	fullURL := fmt.Sprintf("http://jira.renmaitech.com/rest/api/2/issue/")
+	fullURL := fmt.Sprintf("http://<hostname>/rest/api/2/issue/")
 	issue := &Issue{
 		Fields: &Fields{
 			Project: map[string]string{
@@ -68,7 +68,7 @@ func (s *JiraService) CreateIssue(projectKey, parentIssue, issueTypeID, summary,
 	bs, _ := json.Marshal(issue)
 	fmt.Println(string(bs))
 	req, _ := http.NewRequest("POST", fullURL, bytes.NewReader(bs))
-	req.SetBasicAuth("008903", "Renmai671056")
+	req.SetBasicAuth("username", "password")
 	req.Header.Set("Content-Type", "application/json")
 	res, err := s.HTTPClient.Do(req)
 	if err != nil {
@@ -78,12 +78,12 @@ func (s *JiraService) CreateIssue(projectKey, parentIssue, issueTypeID, summary,
 	rbs, _ := ioutil.ReadAll(res.Body)
 	fmt.Println(string(rbs))
 	json.Unmarshal(rbs, &result)
-	return s.CreateRemoteLink(result["id"], remoteLink, "任买Gitlab issue")
+	return s.CreateRemoteLink(result["id"], remoteLink, "Gitlab issue")
 }
 
 // CreateRemoteLink todo
 func (s *JiraService) CreateRemoteLink(issueIDOrKey, url, title string) error {
-	fullURL := fmt.Sprintf("http://jira.renmaitech.com/rest/api/2/issue/%v/remotelink", issueIDOrKey)
+	fullURL := fmt.Sprintf("http://<hostname>/rest/api/2/issue/%v/remotelink", issueIDOrKey)
 	jsonMap := map[string]map[string]string{
 		"object": map[string]string{
 			"url":   url,
@@ -93,7 +93,7 @@ func (s *JiraService) CreateRemoteLink(issueIDOrKey, url, title string) error {
 
 	bs, _ := json.Marshal(jsonMap)
 	req, _ := http.NewRequest("POST", fullURL, bytes.NewReader(bs))
-	req.SetBasicAuth("008903", "Renmai671056")
+	req.SetBasicAuth("username", "password")
 	req.Header.Set("Content-Type", "application/json")
 	_, err := s.HTTPClient.Do(req)
 
