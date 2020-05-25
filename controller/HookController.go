@@ -96,8 +96,8 @@ type HookIssue struct {
 	Project          map[string]interface{}   `json:"project"`
 	Labels           []map[string]interface{} `json:"labels"`
 	// {
-	// 	"name": "石志尹",
-	// 	"username": "0089031",
+	// 	"name": "alex",
+	// 	"username": "username",
 	// 	"avatar_url": "http://www.gravatar.com/avatar/f9d154aeef64cf3c3d0150ec31096ddb?s=80&d=identicon"
 	// }
 	Assignees []map[string]string `json:"assignees"`
